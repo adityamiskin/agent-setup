@@ -1,15 +1,17 @@
 ---
 name: html-communication
-description: Use when the user asks to communicate through an HTML document, or mentions HTML with no additional context. Do not use for HTML that ships as part of a product.
+description: Use only when the user requests an HTML plan, report, summary, comparison, or visual UI mock. Never use it to implement, modify, or deliver product work.
 ---
 
 # HTML Communication
 
-## When to Use
+## Scope and Boundary
 
-Use this skill when the user wants a plan, spec, write-up, findings, summary, report, comparison, or set of UI mocks presented as readable HTML.
+Use this skill only when the requested deliverable is an HTML plan, spec, write-up, findings, summary, report, comparison, or visual UI mock. HTML created under this skill is for communication and review, not implementation.
 
-Do not use it for HTML that ships as part of a product.
+Do not activate this skill just because a request mentions HTML. In particular, do not use it to fulfill coding, implementation, integration, or other product-work requests. For those requests, work in the relevant project files using the normal development workflow. Do not substitute a demo or mock HTML file for requested product changes, and do not treat a mock as completed implementation. If a request explicitly asks for both a plan/mock and implementation, keep those as distinct deliverables and follow the project's normal implementation process for the latter.
+
+Do not use this skill for HTML that ships as part of a product.
 
 ## Document
 
@@ -24,7 +26,7 @@ Do not use it for HTML that ships as part of a product.
 
 ## UI Mocks
 
-When the user asks for variants:
+Mocks are visual proposals for review only. Do not connect them to product code or present them as implemented work. When the user asks for variants:
 
 - Render real styled variants, not descriptions.
 - Label them 'A', 'B', 'C'... for easy selection.
