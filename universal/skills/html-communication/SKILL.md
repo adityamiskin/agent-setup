@@ -1,13 +1,13 @@
 ---
 name: html-communication
-description: Use only when the user requests an HTML plan, report, summary, comparison, or visual UI mock. Never use it to implement, modify, or deliver product work.
+description: Use when the user requests an HTML plan, report, summary, comparison, or visual UI mock, or when a new screen, layout, or redesign needs a mock before implementation. Never use it to implement, modify, or deliver product work.
 ---
 
 # HTML Communication
 
 ## Scope and Boundary
 
-Use this skill only when the requested deliverable is an HTML plan, spec, write-up, findings, summary, report, comparison, or visual UI mock. HTML created under this skill is for communication and review, not implementation.
+Use this skill only when the requested deliverable is an HTML plan, spec, write-up, findings, summary, report, comparison, or visual UI mock, or when a new screen, layout, or redesign needs a mock before implementation. HTML created under this skill is for communication and review, not implementation.
 
 Do not activate this skill just because a request mentions HTML. In particular, do not use it to fulfill coding, implementation, integration, or other product-work requests. For those requests, work in the relevant project files using the normal development workflow. Do not substitute a demo or mock HTML file for requested product changes, and do not treat a mock as completed implementation. If a request explicitly asks for both a plan/mock and implementation, keep those as distinct deliverables and follow the project's normal implementation process for the latter.
 
@@ -26,8 +26,9 @@ Do not use this skill for HTML that ships as part of a product.
 
 ## UI Mocks
 
-Mocks are visual proposals for review only. Do not connect them to product code or present them as implemented work. When the user asks for variants:
+Mocks are visual proposals for review only. Do not connect them to product code or present them as implemented work.
 
+- Build several distinct variants, report the file path, and stop. Wait for a pick before implementing.
 - Render real styled variants, not descriptions.
 - Label them 'A', 'B', 'C'... for easy selection.
 - Lay them out for direct comparison.
