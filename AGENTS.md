@@ -31,21 +31,30 @@ I wanted to share some of my preferences here so we can be more aligned as we wo
 ## Questions are read-only
 
 - A question is a request for an answer, not for changes. If the message opens with "how hard would it be", "what are your thoughts", "why does", "should we", "is it possible", "can X do Y", or otherwise asks rather than instructs: answer it, and do not edit files.
+- If there are issues that are still there, do not ask if you should fix them. just fix them regardless if they are close to the changes u make.
 - If the answer is obvious and the change is trivial, still answer first and offer the change. Ask before making it.
 
 ## Visual and design work
 
-- New screens, layouts, redesigns: mock first with the `html-communication` skill and wait for a pick. Small, specific changes (fixes, spacing/size/color tweaks, copy edits, moving an element): just make the change; if unsure which it is, ask in one line.
+- New screens, layouts, redesigns: mock first with the `html-communication` skill and wait for a pick, unless I said to build it directly or "no mocks". Small, specific changes (fixes, spacing/size/color tweaks, copy edits, moving an element): just make the change; if unsure which it is, ask in one line.
 - Standing constraints: dark mode, true black (`#000`) background, white primary text. Information-dense, no decorative card/pill chrome, no light-gray subtitle lines above sections. Minimal filler copy in anything you create; keep it concise and purposeful. No em dashes.
 - Avoid continuously repainting CSS animations (pulse, shimmer, blur, spinners); they peg the GPU on high-refresh displays.
 
 ## Scope
 
 - Touch only what was asked. List other issues you notice; don't fix them.
-- Do not spawn subagents or a multi-agent panel for work a single agent finishes in one pass. Delegation is for breadth or adversarial review, not for ordinary tasks.
-- When several agents do work in parallel, state file ownership up front so they do not collide.
+- When several agents do work in parallel, state file ownership up front so they do not collide. An owner may edit adjacent files needed to finish its task; list them in the report instead of asking.
 - Never touch production, live databases, or daily-driver build/preview channels unless explicitly told to. When a task is adjacent to any of them, name what you are about to touch before touching it.
 - When root access is genuinely needed, use `pkexec` to prompt the user for their password instead of using `sudo`. Never ask the user to send a password in chat.
+
+## When to stop
+
+Stop and ask only when:
+- the next step writes to prod, deletes data, spends money, or sends something outside the repo
+- two of my instructions conflict
+- a required tool or credential is missing (report which one; don't fall back silently)
+
+Otherwise finish the task, verify it, and report.
 
 ## Pull Requests
 
