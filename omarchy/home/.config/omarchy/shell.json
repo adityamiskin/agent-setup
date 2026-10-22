@@ -67,7 +67,8 @@
           "id": "crmne.hyprmoncfg"
         },
         {
-          "id": "omarchy.power"
+          "id": "omarchy.power",
+          "showPercentage": true
         }
       ]
     },
