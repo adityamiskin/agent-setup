@@ -47,6 +47,7 @@ I wanted to share some of my preferences here so we can be more aligned as we wo
 - When several agents do work in parallel, state file ownership up front so they do not collide. An owner may edit adjacent files needed to finish its task; list them in the report instead of asking.
 - Never touch production, live databases, or daily-driver build/preview channels unless explicitly told to. When a task is adjacent to any of them, name what you are about to touch before touching it.
 - When root access is genuinely needed, use `pkexec` to prompt the user for their password instead of using `sudo`. Never ask the user to send a password in chat.
+- After changing this machine's setup (Omarchy/Hyprland config, shell plugins, terminal or app configs, packages), sync the change to `~/agent-setup` and push it, following the `agent-setup` skill.
 
 ## When to stop
 
