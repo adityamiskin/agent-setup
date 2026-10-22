@@ -38,6 +38,7 @@ I wanted to share some of my preferences here so we can be more aligned as we wo
 
 - New screens, layouts, redesigns: mock first with the `html-communication` skill and wait for a pick, unless I said to build it directly or "no mocks". Small, specific changes (fixes, spacing/size/color tweaks, copy edits, moving an element): just make the change; if unsure which it is, ask in one line.
 - Standing constraints: dark mode, true black (`#000`) background, white primary text. Information-dense, no decorative card/pill chrome, no light-gray subtitle lines above sections. Minimal filler copy in anything you create; keep it concise and purposeful. No em dashes.
+- Remove duplicate explanatory copy from layouts, but keep necessary form labels and control names. For example, a search box next to a "Search" button can omit a redundant visible label, but must retain its accessible name in code. Clean interfaces and screen reader usability do not conflict.
 - Avoid continuously repainting CSS animations (pulse, shimmer, blur, spinners); they peg the GPU on high-refresh displays.
 
 ## Scope
