@@ -1,28 +1,25 @@
 #!/usr/bin/env bash
-# Fresh Arch-based machine (Omarchy, CachyOS, plain Arch) -> Aditya's dev setup.
+# Fresh Omarchy install -> Aditya's dev setup. Skips everything Omarchy already ships.
 # Safe to re-run: every step skips what is already there.
 set -euo pipefail
 
 PACMAN=(
-  base-devel git github-cli git-delta lazygit openssh
-  fish zoxide eza bat fd fzf ripgrep ripgrep-all dust duf procs bottom btop
-  hyperfine tokei xh yq aria2 wget rsync pv ncdu plocate man-db vim
-  7zip unzip unrar ouch
+  github-cli git-delta openssh
+  fish ripgrep-all dust duf procs bottom
+  hyperfine tokei xh yq aria2 wget rsync pv ncdu vim
+  7zip unrar ouch
   uv python jdk-openjdk android-tools
   ghostty zed tailscale qemu-desktop edk2-ovmf
-  ttf-fira-code ttf-meslo-nerd noto-fonts noto-fonts-cjk noto-fonts-emoji
-  libreoffice-fresh darktable vlc vlc-plugins-all qbittorrent loupe papers
+  ttf-fira-code ttf-meslo-nerd
+  vlc vlc-plugins-all
+  steam flatpak
 )
 AUR=(
-  yay google-chrome slack-desktop vesktop otf-apple-sf-pro
-  t3code-nightly-bin typeaside-bin wordcraft-bin
+  google-chrome slack-desktop vesktop otf-apple-sf-pro
+  typeaside-bin
 )
 RUST_TARGETS=(aarch64-apple-darwin x86_64-pc-windows-msvc)
-CARGO_CRATES=(cargo-bloat cargo-xwin)
 BUN_GLOBALS=(convex wrangler)
-NPM_GLOBALS=(pnpm agent-browser @opencode/cli @earendil-works/pi-coding-agent)
-UV_TOOLS=(terminaltexteffects)
-UV_PYTHONS=(3.12)
 FISHER_PLUGINS=(ilancosman/tide@v6 patrickf1/fzf.fish jorgebucaran/autopair.fish meaningful-ooo/sponge)
 
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
@@ -33,19 +30,20 @@ step "pacman packages"
 sudo pacman -Syu --needed --noconfirm "${PACMAN[@]}"
 
 step "AUR packages"
-if ! has yay; then
-  tmp=$(mktemp -d)
-  git clone --depth 1 https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-  (cd "$tmp/yay-bin" && makepkg -si --noconfirm)
-fi
 yay -S --needed --noconfirm "${AUR[@]}"
+
+step "GeForce NOW"
+if ! flatpak info --user com.nvidia.geforcenow >/dev/null 2>&1; then
+  flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  flatpak remote-add --user --if-not-exists GeForceNOW https://international.download.nvidia.com/GFNLinux/flatpak/geforcenow.flatpakrepo
+  flatpak install --user --noninteractive GeForceNOW com.nvidia.geforcenow
+fi
 
 step "Rust"
 has rustup || curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
 rustup default stable
 rustup component add clippy rustfmt
 rustup target add "${RUST_TARGETS[@]}"
-for c in "${CARGO_CRATES[@]}"; do cargo install --list | grep -q "^$c " || cargo install --locked "$c"; done
 
 step "Bun"
 has bun || curl -fsSL https://bun.sh/install | bash
@@ -54,15 +52,6 @@ bun add -g "${BUN_GLOBALS[@]}"
 step "Node via Vite+"
 has vp || curl -fsSL https://vite.plus | bash
 npm config set prefix "$HOME/.local"
-npm install -g "${NPM_GLOBALS[@]}"
-
-step "Python via uv"
-uv python install "${UV_PYTHONS[@]}"
-for t in "${UV_TOOLS[@]}"; do uv tool install "$t"; done
-
-step "Agent CLIs"
-has claude || curl -fsSL https://claude.ai/install.sh | bash
-has codex || curl -fsSL https://github.com/openai/codex/releases/latest/download/install.sh | sh
 
 step "Cloud CLIs"
 has fly || curl -fsSL https://fly.io/install.sh | sh
@@ -85,6 +74,9 @@ fish -c "fisher install ${FISHER_PLUGINS[*]}"
 step "Agent setup (skills, AGENTS.md)"
 [ -d "$HOME/agent-setup" ] || gh repo clone adityamiskin/agent-setup "$HOME/agent-setup" || true
 [ -x "$HOME/agent-setup/setup.sh" ] && "$HOME/agent-setup/setup.sh"
+
+step "Omarchy customizations"
+[ -x "$HOME/agent-setup/omarchy/apply.sh" ] && "$HOME/agent-setup/omarchy/apply.sh"
 
 step "Done. Manual follow-ups"
 cat <<'EOF'

@@ -7,15 +7,14 @@ out=${1:-"$HOME/carry-forward-$(date +%Y%m%d).tar.gz"}
 
 PATHS=(
   .ssh .gitconfig .config/git .npmrc .aws
-  .config/fish/config.fish .config/fish/fish_plugins .config/fish/fish_variables .config/fish/functions/yayf.fish
-  .config/ghostty .config/zed .config/lazygit .config/btop .config/starship.toml .config/mimeapps.list
-  .config/systemd/user .config/timewall .config/macos-dynamic-wallpaper .config/typeaside
-  .config/niri .config/noctalia
+  .config/fish/config.fish .config/fish/fish_plugins .config/fish/fish_variables
+  .config/zed .config/starship.toml .config/omarchy/backgrounds
+  .config/systemd/user .config/typeaside
   .claude/CLAUDE.md .claude/settings.json .codex/AGENTS.md .codex/config.toml
 )
 
-# Own scripts and binaries in ~/.local/bin; symlinks there belong to installers bootstrap.sh reruns.
-mapfile -t BINS < <(find .local/bin -maxdepth 1 -type f ! -name '*.pyc')
+# Own scripts and binaries in ~/.local/bin; symlinks belong to installers bootstrap.sh reruns, mise wrappers to Omarchy.
+mapfile -t BINS < <(find .local/bin -maxdepth 1 -type f ! -name '*.pyc' -exec grep -L 'exec mise x' {} +)
 
 existing=()
 for p in "${PATHS[@]}" "${BINS[@]}"; do [ -e "$p" ] && existing+=("$p") || echo "skip (missing): $p" >&2; done

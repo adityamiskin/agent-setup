@@ -1,0 +1,87 @@
+{
+  "bar": {
+    "centerAnchor": "aditya.clock",
+    "layout": {
+      "center": [
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "format": "dddd h:mm AP",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "aditya.clock",
+          "verticalFormat": "h\n—\nmm"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "autoCheckUpdates": true,
+          "id": "omaplug"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "aditya.workspace-icons"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "adityamiskin.wallpaper-colors"
+        },
+        {
+          "id": "meviusisback.hw-monitor",
+          "mode": "icons",
+          "ramFormat": "used/total",
+          "showCpuTemp": false,
+          "showGauges": false,
+          "showGpu": false,
+          "topProcGroup": true,
+          "topProcSort": "ram"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "crmne.hyprmoncfg"
+        },
+        {
+          "id": "omarchy.power"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": true
+  },
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "id": "typecraft.oma-cast"
+    }
+  ],
+  "version": 1
+}
