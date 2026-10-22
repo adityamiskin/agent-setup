@@ -1,6 +1,6 @@
 ---
 name: agent-setup
-description: Use when creating, importing, organizing, or updating personal agent skills, AGENTS.md instructions, or Pi extensions in the agent-setup repository. Helps choose the right scope and keep the repository as the source of truth.
+description: Use when creating, importing, organizing, or updating personal agent skills, AGENTS.md instructions, or Pi extensions in the agent-setup repository. Also use after any change to this machine's setup (Omarchy shell/bar config, shell plugins, Hyprland, terminal or app configs, installed packages) so the change is synced and pushed to agent-setup. Helps choose the right scope and keep the repository as the source of truth.
 ---
 
 # Agent Setup Repository
@@ -18,6 +18,17 @@ This repository is the source of truth for personal agent instructions, skills, 
 If the user asks for a skill without specifying a scope, put it in `universal/skills/` when its instructions apply across agents. Ask or choose a narrower scope only when the skill depends on one agent's runtime or the user limits its audience.
 
 The directory determines scope. Do not add a custom `scope` field to skill frontmatter.
+
+## Sync system changes
+
+`omarchy/` captures this machine's desktop setup: `omarchy/home/` mirrors files under `~`, and `omarchy/apply.sh` layers everything onto a stock Omarchy install. Whenever you change the system, mirror the change here in the same task, then commit and push to `main`. The user has approved pushing these syncs.
+
+- Config edits (`~/.config/omarchy/shell.json`, `~/.config/hypr/`, terminals, app configs): copy the changed file to the same relative path under `omarchy/home/`. Run `diff` first and confirm only your change differs; if the repo copy has drifted otherwise, report it instead of overwriting.
+- New config files: add them under `omarchy/home/`. Never add secrets, tokens, or machine-generated state such as caches or `*.bak.*` backups.
+- Plugins installed from a repo (`omarchy plugin add <url>`): add the id and URL to `PLUGINS` in `omarchy/apply.sh`, and copy the updated `shell.json`.
+- Local or cloned plugins under `~/.config/omarchy/plugins/<id>/`: copy the whole plugin directory under `omarchy/home/`.
+- Packages: add to `PKG_ADD`, `AUR_ADD`, or `PKG_DROP` in `omarchy/apply.sh`. Commands that change state outside `~` belong in the matching `apply.sh` step and must stay safe to re-run.
+- Commit with a conventional message such as `feat(omarchy): show battery percentage in bar`, push, and report the commit hash.
 
 ## Create a skill
 
