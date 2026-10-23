@@ -62,6 +62,23 @@ while IFS= read -r -d '' src; do
 done < <(find "$repo_dir/home" -type f -print0)
 update-desktop-database "$HOME/.local/share/applications"
 
+step "OpenCode theme"
+# Omarchy renders opencode.json.tpl into the active theme on every theme change;
+# the symlink makes it visible to OpenCode as the "omarchy" theme.
+mkdir -p "$HOME/.config/opencode/themes"
+ln -sfn "$HOME/.local/state/omarchy/current/theme/opencode.json" "$HOME/.config/opencode/themes/omarchy.json"
+# Render it once for the current theme so the link resolves before the next switch.
+if [[ -f $HOME/.local/state/omarchy/current/theme/colors.toml ]]; then
+  staging="$HOME/.local/state/omarchy/current/next-theme"
+  rm -rf "$staging"
+  mkdir -p "$staging"
+  cp "$HOME/.local/state/omarchy/current/theme/colors.toml" "$staging/colors.toml"
+  if omarchy-theme-set-templates && [[ -f $staging/opencode.json ]]; then
+    cp "$staging/opencode.json" "$HOME/.local/state/omarchy/current/theme/opencode.json"
+  fi
+  rm -rf "$staging"
+fi
+
 step "Apps and theme"
 omazed setup
 if command -v asusctl >/dev/null; then
