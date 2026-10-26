@@ -12,7 +12,7 @@ PKG_ADD=(
   strata papers matugen asusctl omazed inter-font
   gst-libav gst-plugins-good gst-plugins-bad gst-plugins-ugly libdvdcss libaacs
 )
-AUR_ADD=(hyprmoncfg-bin)
+AUR_ADD=(hyprmoncfg-bin typeaside-bin)
 declare -A PLUGINS=(
   [adityamiskin.wallpaper-colors]=https://github.com/adityamiskin/omarchy-wallpaper-colors
   [aditya.workspace-icons]=https://github.com/adityamiskin/omarchy-workspace-icons
