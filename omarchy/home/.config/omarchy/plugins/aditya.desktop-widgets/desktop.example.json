@@ -1,0 +1,11 @@
+{
+  "pitch": 96,
+  "gap": 12,
+  "margin": 32,
+  "topInset": 40,
+  "widgets": [
+    { "file": "market-simonschubert-today.owl", "col": -6, "row": 0 },
+    { "file": "market-simonschubert-fetch.owl", "col": -3, "row": 0 },
+    { "file": "market-simonschubert-koi-pond.owl", "col": -6, "row": 3 }
+  ]
+}

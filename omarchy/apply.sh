@@ -17,6 +17,8 @@ declare -A PLUGINS=(
   [adityamiskin.wallpaper-colors]=https://github.com/adityamiskin/omarchy-wallpaper-colors
   [aditya.workspace-icons]=https://github.com/adityamiskin/omarchy-workspace-icons
   [crmne.hyprmoncfg]=https://github.com/crmne/omarchy-hyprmoncfg
+  [evindor.keystroke]=https://github.com/evindor/keystroke
+  [io.github.simonschubert.omalauncher]=https://github.com/SimonSchubert/omalauncher-omarchy-plugin
   [meviusisback.hw-monitor]=https://github.com/meviusisback/omarchy-hw-monitor
   [omaplug]=https://github.com/fross100/omaplug
 )
@@ -43,10 +45,6 @@ installed=$(omarchy-plugin-list)
 for id in "${!PLUGINS[@]}"; do
   grep -q "^$id " <<<"$installed" || omarchy-plugin-add "${PLUGINS[$id]}" --enable --yes
 done
-if [[ ! -d $HOME/.local/share/oma-cast ]]; then
-  git clone https://github.com/typecraft-dev/oma-cast.git "$HOME/.local/share/oma-cast"
-  "$HOME/.local/share/oma-cast/bin/oma-cast" install
-fi
 
 step "Config files"
 # Copied rather than linked: Omarchy, hyprmoncfg and the Strata installer rewrite these in place.

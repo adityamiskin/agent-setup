@@ -50,3 +50,10 @@ o.bind("SUPER + SHIFT + F", "File manager", { launch = "/usr/bin/strata" })
 o.bind("SUPER + ALT + SHIFT + F", "File manager (cwd)",
   "uwsm-app -- /usr/bin/strata \"$(omarchy-cmd-terminal-cwd)\"")
 -- strata-installer: file-manager end
+
+-- Launcher: Keystroke (replaces the Omarchy menu / oma-cast on SUPER + SPACE).
+hl.unbind("SUPER + SPACE")
+o.bind("SUPER + SPACE", "Launcher (Keystroke)", "omarchy-menu toggle root")
+
+-- Desktop widgets: show/hide the macOS-style widget layer (aditya.desktop-widgets).
+o.bind("SUPER + ALT + W", "Desktop widgets", "omarchy-shell aditya.desktop-widgets toggle")
