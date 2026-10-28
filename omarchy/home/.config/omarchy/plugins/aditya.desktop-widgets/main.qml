@@ -330,10 +330,12 @@ Item {
 
     function toggle(): string {
       root.shown = !root.shown
+      if (root.shown) scan.running = true
       return root.shown ? "shown" : "hidden"
     }
     function show(): string {
       root.shown = true
+      scan.running = true
       return "shown"
     }
     function hide(): string {
