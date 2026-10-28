@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch the Omarchy stay-awake flag for caffeinate-lid.service
+
+[Path]
+PathExists=%h/.local/state/omarchy/indicators/stay-awake
+Unit=caffeinate-lid.service
+
+[Install]
+WantedBy=default.target

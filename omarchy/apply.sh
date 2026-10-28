@@ -60,6 +60,12 @@ while IFS= read -r -d '' src; do
 done < <(find "$repo_dir/home" -type f -print0)
 update-desktop-database "$HOME/.local/share/applications"
 
+step "Lid caffeinate"
+# Watches Omarchy's stay-awake flag and holds a logind lid-switch inhibitor for it.
+chmod +x "$HOME/.local/bin/caffeinate"
+systemctl --user daemon-reload
+systemctl --user enable --now caffeinate-lid.path >/dev/null
+
 step "OpenCode theme"
 # Omarchy renders opencode.json.tpl into the active theme on every theme change;
 # the symlink makes it visible to OpenCode as the "omarchy" theme.
