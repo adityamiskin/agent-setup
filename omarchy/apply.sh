@@ -19,6 +19,7 @@ declare -A PLUGINS=(
   [crmne.hyprmoncfg]=https://github.com/crmne/omarchy-hyprmoncfg
   [evindor.keystroke]=https://github.com/evindor/keystroke
   [io.github.simonschubert.omalauncher]=https://github.com/SimonSchubert/omalauncher-omarchy-plugin
+  [lgse.sandman]=https://github.com/lgse/sandman
   [meviusisback.hw-monitor]=https://github.com/meviusisback/omarchy-hw-monitor
   [omaplug]=https://github.com/fross100/omaplug
 )
@@ -59,12 +60,6 @@ while IFS= read -r -d '' src; do
   echo "Wrote $dest"
 done < <(find "$repo_dir/home" -type f -print0)
 update-desktop-database "$HOME/.local/share/applications"
-
-step "Lid caffeinate"
-# Watches Omarchy's stay-awake flag and holds a logind lid-switch inhibitor for it.
-chmod +x "$HOME/.local/bin/caffeinate"
-systemctl --user daemon-reload
-systemctl --user enable --now caffeinate-lid.path >/dev/null
 
 step "OpenCode theme"
 # Omarchy renders opencode.json.tpl into the active theme on every theme change;

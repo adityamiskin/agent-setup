@@ -58,11 +58,10 @@ o.bind("SUPER + SPACE", "Launcher (Keystroke)", "omarchy-menu toggle root")
 -- Desktop widgets: show/hide the macOS-style widget layer (aditya.desktop-widgets).
 o.bind("SUPER + ALT + W", "Desktop widgets", "omarchy-shell aditya.desktop-widgets toggle")
 
--- Caffeinate: while Omarchy's "stay awake" flag is on (coffee cup in the bar),
--- block lid-close suspend and just power the panel down. See ~/.local/bin/caffeinate.
--- Replaces the stock lid binds (which locked then let logind suspend).
+-- BEGIN Sandman lid action override
+-- Sandman manages laptop lid-close actions. Omarchy's default lid-close
+-- binding locks immediately on lid close, before Sandman can apply Do nothing
+-- or Display off, so replace it with monitor/clamshell reconciliation only.
 hl.unbind("switch:on:Lid Switch")
-hl.unbind("switch:off:Lid Switch")
-o.bind("switch:on:Lid Switch", nil, "~/.local/bin/caffeinate lid-close", { locked = true })
-o.bind("switch:off:Lid Switch", nil, "~/.local/bin/caffeinate lid-open", { locked = true })
-o.bind("SUPER + CTRL + ALT + C", "Caffeinate (keep running, lid closed)", "~/.local/bin/caffeinate toggle")
+o.bind("switch:on:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { locked = true })
+-- END Sandman lid action override
