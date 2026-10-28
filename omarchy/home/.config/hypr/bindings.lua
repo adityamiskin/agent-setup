@@ -55,9 +55,6 @@ o.bind("SUPER + ALT + SHIFT + F", "File manager (cwd)",
 hl.unbind("SUPER + SPACE")
 o.bind("SUPER + SPACE", "Launcher (Keystroke)", "omarchy-menu toggle root")
 
--- Desktop widgets: show/hide the macOS-style widget layer (aditya.desktop-widgets).
-o.bind("SUPER + ALT + W", "Desktop widgets", "omarchy-shell aditya.desktop-widgets toggle")
-
 -- BEGIN Sandman lid action override
 -- Sandman manages laptop lid-close actions. Omarchy's default lid-close
 -- binding locks immediately on lid close, before Sandman can apply Do nothing
