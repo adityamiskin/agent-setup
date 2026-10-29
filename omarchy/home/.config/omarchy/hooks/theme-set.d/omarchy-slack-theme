@@ -1,0 +1,4 @@
+#!/bin/bash
+# Regenerate Slack CSS; the patched Slack picks it up live. Never fail the theme switch.
+~/.local/bin/omarchy-slack-theme || logger -t omarchy-slack-theme "failed to generate Slack theme for ${1:-unknown}"
+exit 0

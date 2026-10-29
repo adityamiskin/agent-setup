@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = usr/lib/slack/resources/app.asar
+
+[Action]
+Description = Re-applying Omarchy theme loader to Slack...
+When = PostTransaction
+Exec = /usr/local/bin/omarchy-slack-asar-patch

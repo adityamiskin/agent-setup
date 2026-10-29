@@ -78,6 +78,18 @@ if [[ -f $HOME/.local/state/omarchy/current/theme/colors.toml ]]; then
   rm -rf "$staging"
 fi
 
+step "Slack theme"
+# Vendored from github.com/GruperTal/omarchy-slack-theme; see slack/README.md.
+if [[ -d /usr/lib/slack/resources ]]; then
+  chmod +x "$HOME/.local/bin/omarchy-slack-theme" \
+    "$HOME/.config/omarchy/hooks/theme-set.d/omarchy-slack-theme"
+  sudo install -Dm755 "$repo_dir/slack/slack-asar-patch" /usr/local/bin/omarchy-slack-asar-patch
+  sudo install -Dm644 "$repo_dir/slack/omarchy-slack-theme.hook" /etc/pacman.d/hooks/omarchy-slack-theme.hook
+  "$HOME/.local/bin/omarchy-slack-theme"
+  # Re-patches only when Slack has been upgraded since the last run.
+  sudo /usr/local/bin/omarchy-slack-asar-patch
+fi
+
 step "Apps and theme"
 omazed setup
 if command -v asusctl >/dev/null; then
