@@ -34,12 +34,6 @@ omarchy-pkg-aur-add "${AUR_ADD[@]}"
 omarchy-pkg-drop "${PKG_DROP[@]}"
 omarchy-webapp-remove-all
 
-step "Agent tools"
-# npm 11 blocks postinstall scripts; the package needs one to install its native binary.
-if ! command -v agent-desktop >/dev/null; then
-  npm install -g --allow-scripts=agent-desktop agent-desktop
-fi
-
 step "Locale"
 # config.fish exports en_IN.UTF-8.
 if ! locale -a | grep -qx 'en_IN.utf8'; then
