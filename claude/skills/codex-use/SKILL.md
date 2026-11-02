@@ -41,6 +41,12 @@ Chrome control is the only way Codex drives the machine here. It works through t
 - Use it by default when UI needs verifying; no need to ask permission.
 - Verify once per feature, after implementation is finished. Batch checks into one run instead of one run per change.
 - If Codex reports Chrome control or `node_repl` is unavailable, or times out connecting, stop and report that. Do not fall back to T3 preview, Playwright, or another browser, and do not retry.
+- "Skill missing" is a different failure: the plugin cache lost `skills/control-chrome/SKILL.md` (materialization bug, seen 2026-10-21). Repair in one step, verify, then run the browser check once:
+  ```sh
+  cp -r ~/.codex/.tmp/bundled-marketplaces/openai-bundled/plugins/chrome/skills/control-chrome ~/.codex/plugins/cache/openai-bundled/chrome/latest/skills/
+  codex debug prompt-input | grep -c control-chrome   # expect 2
+  ```
+  If the cache directory itself is gone, reinstall instead: `codex plugin remove chrome@openai-bundled && codex plugin add chrome@openai-bundled`.
 
 ```sh
 codex exec 'Use Chrome control (control-chrome skill). Open http://localhost:5173/threads.
