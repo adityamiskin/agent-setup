@@ -12,7 +12,6 @@ Run by cliproxy-pool-tuner.timer every 10 minutes. Safe to run by hand.
 from __future__ import annotations
 
 import json
-import math
 import pathlib
 import sys
 import urllib.error
@@ -31,10 +30,17 @@ BASE_WEIGHTS = (
 )
 DEFAULT_WEIGHT = 1
 
-# Start burning leftover quota when this little time is left before a reset.
+# Burn leftovers near a reset, and any weekly window that is behind the pace
+# needed to spend it before the reset. MAX_WEIGHT makes a burning account take
+# almost all new sessions (64 against a base of 1-4).
 WEEKLY_BURN_HORIZON_H = 12.0
 SESSION_BURN_HORIZON_H = 1.5
-MAX_WEIGHT = 16
+MAX_WEIGHT = 64
+
+# A weekly window is behind pace when more quota is left than the share of the
+# week still remaining. Burn whenever it is this far ahead of the clock.
+WEEK_HOURS = 7 * 24
+WEEKLY_PACE_SLACK = 1.25
 
 # Every weekly window the usage API can report.
 WEEKLY_WINDOWS = ("seven_day", "seven_day_opus", "seven_day_sonnet")
@@ -116,9 +122,11 @@ def desired_weight(usage: dict, email: str | None) -> tuple[int, str]:
             if remaining >= 0.05 and hours <= SESSION_BURN_HORIZON_H:
                 weight = min(MAX_WEIGHT, max(weight, base) * 2)
                 reasons.append(f"session burn {remaining * 100:.0f}% / {hours:.1f}h")
-        elif remaining >= 0.02 and hours <= WEEKLY_BURN_HORIZON_H:
-            burn = 1.0 + (remaining * 100.0 * WEEKLY_BURN_HORIZON_H) / (max(hours, 1.0) * 10.0)
-            weight = max(weight, min(MAX_WEIGHT, math.ceil(burn)))
+        elif remaining >= 0.02 and (
+            hours <= WEEKLY_BURN_HORIZON_H
+            or remaining > (hours / WEEK_HOURS) * WEEKLY_PACE_SLACK
+        ):
+            weight = MAX_WEIGHT
             reasons.append(f"{name} burn {remaining * 100:.0f}% / {hours:.1f}h")
 
     return int(weight), "; ".join(reasons)

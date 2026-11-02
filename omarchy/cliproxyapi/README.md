@@ -18,9 +18,11 @@ hub, so every client shares the same account pool and the same usage limits.
 
 - base share: Zapsight 4, Gmail 1 (Zapsight reports no weekly window)
 - weight 0 while a session or weekly window is exhausted
-- burn boost when a window is close to resetting and still has quota left,
-  because unused quota is lost at reset
-- capped at 16 per account
+- weight 64 when a weekly window is behind the pace needed to spend it before
+  its reset, or when any window is close to resetting with quota left; unused
+  quota is lost at reset
+- 64 against a base of 1-4 makes the burning account take almost all new
+  sessions, so the expiring quota is what gets spent
 
 ## Install
 
