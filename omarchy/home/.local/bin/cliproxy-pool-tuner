@@ -2,7 +2,8 @@
 """Reset-aware weight tuner for the CLIProxyAPI Claude pool.
 
 Sets each Claude account's weighted-round-robin weight from:
-  * a base share per account (Zapsight 4, everything else 1)
+  * a base share per account, matched to each plan's weekly capacity
+    (Zapsight Team Standard ~1.25x Pro, so 5:4)
   * a burn boost when a quota window is close to resetting with quota left
   * weight 0 while a session or weekly window is exhausted
 
@@ -24,9 +25,11 @@ STATE = HOME / ".local" / "state" / "cliproxy-pool-tuner.json"
 API = "http://127.0.0.1:8317/v8/management"
 
 # Base weighted-round-robin share, matched on the login email.
+# Zapsight is a Team Standard seat (~1.25x Pro weekly), Gmail is Pro, so 5:4
+# drains both weeklies at the same rate. The burn logic handles the rest.
 BASE_WEIGHTS = (
-    ("zapsight.com", 4),
-    ("gmail.com", 1),
+    ("zapsight.com", 5),
+    ("gmail.com", 4),
 )
 DEFAULT_WEIGHT = 1
 

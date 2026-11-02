@@ -16,7 +16,10 @@ hub, so every client shares the same account pool and the same usage limits.
 
 `cliproxy-pool-tuner` sets each Claude account's weighted-round-robin weight:
 
-- base share: Zapsight 4, Gmail 1 (Zapsight reports no weekly window)
+- base share: Zapsight 5, Gmail 4. Zapsight is a Team Standard seat
+  (1.25x Pro per Anthropic's docs), Gmail is Pro, so 5:4 drains both weeklies
+  at the same rate. If the seat becomes Premium (6.25x Pro), raise Zapsight's
+  base to keep pace.
 - weight 0 while a session or weekly window is exhausted
 - weight 64 when a weekly window is behind the pace needed to spend it before
   its reset, or when any window is close to resetting with quota left; unused
