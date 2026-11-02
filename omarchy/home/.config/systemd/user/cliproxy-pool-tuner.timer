@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the CLIProxyAPI pool weight tuner periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Persistent=true
+Unit=cliproxy-pool-tuner.service
+
+[Install]
+WantedBy=timers.target

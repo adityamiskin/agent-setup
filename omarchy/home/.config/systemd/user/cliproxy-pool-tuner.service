@@ -1,0 +1,9 @@
+[Unit]
+Description=Reset-aware weight tuner for the CLIProxyAPI Claude pool
+After=cliproxyapi.service
+Wants=cliproxyapi.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/cliproxy-pool-tuner
+Nice=10

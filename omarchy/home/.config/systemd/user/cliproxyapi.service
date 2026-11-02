@@ -1,0 +1,14 @@
+[Unit]
+Description=CLIProxyAPI (Claude/Codex subscription hub)
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/cliproxyapi
+ExecStart=%h/cliproxyapi/cli-proxy-api --config %h/cliproxyapi/config.yaml
+Restart=always
+RestartSec=5
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target

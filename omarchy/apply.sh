@@ -61,6 +61,9 @@ while IFS= read -r -d '' src; do
 done < <(find "$repo_dir/home" -type f -print0)
 update-desktop-database "$HOME/.local/share/applications"
 
+step "CLIProxyAPI hub"
+"$repo_dir/cliproxyapi/install.sh"
+
 step "OpenCode theme"
 # Omarchy renders opencode.json.tpl into the active theme on every theme change;
 # the symlink makes it visible to OpenCode as the "omarchy" theme.

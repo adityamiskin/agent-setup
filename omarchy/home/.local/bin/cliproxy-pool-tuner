@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""Reset-aware weight tuner for the CLIProxyAPI Claude pool.
+
+Sets each Claude account's weighted-round-robin weight from:
+  * a base share per account (Zapsight 4, everything else 1)
+  * a burn boost when a quota window is close to resetting with quota left
+  * weight 0 while a session or weekly window is exhausted
+
+Run by cliproxy-pool-tuner.timer every 10 minutes. Safe to run by hand.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import pathlib
+import sys
+import urllib.error
+import urllib.request
+from datetime import datetime, timezone
+
+HOME = pathlib.Path.home()
+KEYS = HOME / "cliproxyapi" / ".keys"
+STATE = HOME / ".local" / "state" / "cliproxy-pool-tuner.json"
+API = "http://127.0.0.1:8317/v8/management"
+
+# Base weighted-round-robin share, matched on the login email.
+BASE_WEIGHTS = (
+    ("zapsight.com", 4),
+    ("gmail.com", 1),
+)
+DEFAULT_WEIGHT = 1
+
+# Start burning leftover quota when this little time is left before a reset.
+WEEKLY_BURN_HORIZON_H = 12.0
+SESSION_BURN_HORIZON_H = 1.5
+MAX_WEIGHT = 16
+
+# Every weekly window the usage API can report.
+WEEKLY_WINDOWS = ("seven_day", "seven_day_opus", "seven_day_sonnet")
+
+
+def management_key() -> str:
+    for line in KEYS.read_text().splitlines():
+        if line.startswith("MANAGEMENT_KEY="):
+            return line.split("=", 1)[1].strip()
+    raise SystemExit("management key not found in ~/cliproxyapi/.keys")
+
+
+def api(method: str, path: str, body: dict | None = None) -> dict:
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(
+        API + path,
+        data=data,
+        method=method,
+        headers={
+            "Authorization": f"Bearer {management_key()}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=20) as response:
+        raw = response.read()
+    return json.loads(raw) if raw else {}
+
+
+def base_weight(email: str | None) -> int:
+    email = (email or "").lower()
+    for suffix, weight in BASE_WEIGHTS:
+        if suffix in email:
+            return weight
+    return DEFAULT_WEIGHT
+
+
+def window(usage: dict, name: str) -> tuple[float, float | None] | None:
+    """Return (remaining_fraction, hours_until_reset) for a usage window."""
+    entry = usage.get(name)
+    if not isinstance(entry, dict):
+        return None
+    utilization = entry.get("utilization")
+    if utilization is None:
+        return None
+    try:
+        remaining = max(0.0, 1.0 - float(utilization) / 100.0)
+    except (TypeError, ValueError):
+        return None
+    hours = None
+    resets_at = entry.get("resets_at")
+    if resets_at:
+        try:
+            reset = datetime.fromisoformat(resets_at.replace("Z", "+00:00"))
+            if reset.tzinfo is None:
+                reset = reset.replace(tzinfo=timezone.utc)
+            hours = max(0.0, (reset - datetime.now(timezone.utc)).total_seconds() / 3600)
+        except ValueError:
+            hours = None
+    return remaining, hours
+
+
+def desired_weight(usage: dict, email: str | None) -> tuple[int, str]:
+    base = base_weight(email)
+    windows = [("session", window(usage, "five_hour"))]
+    windows += [(name, window(usage, name)) for name in WEEKLY_WINDOWS]
+
+    # An exhausted window cannot serve requests, so take the account out of rotation.
+    for name, value in windows:
+        if value and value[0] <= 0.01:
+            return 0, f"{name} exhausted"
+
+    weight = float(base)
+    reasons = [f"base {base}"]
+    for name, value in windows:
+        if not value or value[1] is None:
+            continue
+        remaining, hours = value
+        if name == "session":
+            if remaining >= 0.05 and hours <= SESSION_BURN_HORIZON_H:
+                weight = min(MAX_WEIGHT, max(weight, base) * 2)
+                reasons.append(f"session burn {remaining * 100:.0f}% / {hours:.1f}h")
+        elif remaining >= 0.02 and hours <= WEEKLY_BURN_HORIZON_H:
+            burn = 1.0 + (remaining * 100.0 * WEEKLY_BURN_HORIZON_H) / (max(hours, 1.0) * 10.0)
+            weight = max(weight, min(MAX_WEIGHT, math.ceil(burn)))
+            reasons.append(f"{name} burn {remaining * 100:.0f}% / {hours:.1f}h")
+
+    return int(weight), "; ".join(reasons)
+
+
+def current_weight(name: str) -> int | None:
+    try:
+        return json.loads((HOME / ".cli-proxy-api" / name).read_text()).get("weight")
+    except (OSError, ValueError):
+        return None
+
+
+def usage_for(auth_index: str) -> dict | None:
+    response = api(
+        "POST",
+        "/requests/api-call",
+        {
+            "auth_index": auth_index,
+            "method": "GET",
+            "url": "https://api.anthropic.com/api/oauth/usage",
+            "header": {
+                "Authorization": "Bearer $TOKEN$",
+                "anthropic-version": "2023-06-01",
+                "anthropic-beta": "oauth-2025-04-20",
+            },
+        },
+    )
+    if response.get("status_code") != 200:
+        return None
+    try:
+        return json.loads(response.get("body") or "{}")
+    except ValueError:
+        return None
+
+
+def main() -> int:
+    try:
+        credentials = api("GET", "/credentials").get("files", [])
+    except (urllib.error.URLError, OSError) as error:
+        print(f"hub unavailable, leaving weights alone: {error}", flush=True)
+        return 0
+    state: dict[str, str] = {}
+    if STATE.exists():
+        try:
+            state = json.loads(STATE.read_text())
+        except ValueError:
+            state = {}
+
+    changed = 0
+    for credential in credentials:
+        if credential.get("provider") != "claude":
+            continue
+        name = credential.get("name")
+        auth_index = credential.get("auth_index")
+        email = credential.get("email")
+        if not name or not auth_index:
+            continue
+
+        try:
+            usage = usage_for(auth_index)
+        except (urllib.error.URLError, OSError) as error:
+            print(f"{email}: usage request failed ({error}), leaving weight alone", flush=True)
+            continue
+        if usage is None:
+            print(f"{email}: usage unavailable, leaving weight alone", flush=True)
+            continue
+
+        weight, reason = desired_weight(usage, email)
+        state[name] = reason
+        old = current_weight(name)
+        if old == weight:
+            continue
+
+        api("PATCH", "/credentials/fields", {"name": name, "weight": weight})
+        if old == 0 and weight > 0:
+            try:
+                api("POST", "/routing/cooldown/reset", {"auth_index": auth_index})
+            except urllib.error.HTTPError:
+                pass
+        print(f"{email}: weight {old} -> {weight} ({reason})", flush=True)
+        changed += 1
+
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(state, indent=2) + "\n")
+    if changed == 0:
+        print("weights unchanged", flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
