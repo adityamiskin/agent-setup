@@ -9,7 +9,7 @@ PKG_DROP=(
   libreoffice-fresh kdenlive obs-studio pinta xournalpp obsidian
 )
 PKG_ADD=(
-  strata papers matugen asusctl omazed inter-font
+  strata papers matugen asusctl omazed inter-font jdk-openjdk
   gst-libav gst-plugins-good gst-plugins-bad gst-plugins-ugly libdvdcss libaacs
 )
 AUR_ADD=(hyprmoncfg-bin typeaside-bin)
@@ -60,6 +60,28 @@ while IFS= read -r -d '' src; do
   echo "Wrote $dest"
 done < <(find "$repo_dir/home" -type f -print0)
 update-desktop-database "$HOME/.local/share/applications"
+
+step "Android SDK"
+# Lets T3 Code's Device panel run Android emulators (/dev/kvm is already user-accessible).
+sdk="$HOME/Android/Sdk"
+if [[ ! -x $sdk/cmdline-tools/latest/bin/sdkmanager ]]; then
+  tmp=$(mktemp -d)
+  curl -fsSLo "$tmp/clt.zip" https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip
+  unzip -q "$tmp/clt.zip" -d "$tmp"
+  mkdir -p "$sdk/cmdline-tools" && mv "$tmp/cmdline-tools" "$sdk/cmdline-tools/latest"
+  rm -rf "$tmp"
+fi
+yes | "$sdk/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+"$sdk/cmdline-tools/latest/bin/sdkmanager" platform-tools emulator "platforms;android-36" "system-images;android-36;google_apis;x86_64"
+"$sdk/emulator/emulator" -list-avds | grep -qx Pixel_9_API_36 ||
+  echo no | "$sdk/cmdline-tools/latest/bin/avdmanager" create avd -n Pixel_9_API_36 -k "system-images;android-36;google_apis;x86_64" -d pixel_9
+grep -q ANDROID_HOME "$HOME/.config/fish/config.fish" || cat >>"$HOME/.config/fish/config.fish" <<'FISH'
+
+set -gx ANDROID_HOME $HOME/Android/Sdk
+fish_add_path --global $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
+FISH
+grep -q ANDROID_HOME "$HOME/.bashrc" ||
+  sed -i '\|default/bash/env-bootstrap$|a export ANDROID_HOME="$HOME/Android/Sdk"\nexport PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"' "$HOME/.bashrc"
 
 step "CLIProxyAPI hub"
 "$repo_dir/cliproxyapi/install.sh"
