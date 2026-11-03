@@ -11,9 +11,11 @@ Codex (`codex`, `~/.codex/config.toml`) does two jobs: implementing from a spec 
 
 - Codex is on a $20 Plus plan, so every run costs scarce budget. Browser runs cost the most (screenshots).
 - `codex` on PATH and logged in. If it is missing or rate-limited, implement the task yourself, say Codex was unavailable, and list the browser checks still owed. Don't run the browser checks yourself, and don't retry in a loop.
-- One-shot `codex exec` with medium effort (the config default). Interactive sessions accumulate context and cost more.
+- In T3 Code, run Codex through `delegate_task` (provider `codex`) so the run shows up as a thread. Use the `codex exec` CLI only outside T3.
+- One-off tasks (uploads, single browser checks, small lookups): `gpt-6.1-terra` with `reasoningEffort: medium`. Interactive sessions accumulate context and cost more.
 - Put everything in one prompt. Don't resend the same instruction; if a run went wrong, fix the prompt and run once more.
-- Pass an explicit Bash timeout; runs can exceed the 10-minute default.
+- For the CLI, pass an explicit Bash timeout and run from inside a trusted repo; runs can exceed the 10-minute default.
+- Browser uploads are allowed for every site (`[browser_use.default_origin_policy] uploads = "allow"` in `~/.codex/config.toml`). If one is refused, check that setting before asking the user.
 
 ## Implement
 
