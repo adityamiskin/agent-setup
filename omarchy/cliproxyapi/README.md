@@ -92,6 +92,15 @@ Both keys are in `~/cliproxyapi/.keys`.
 
 ## Troubleshooting
 
+**One account, one login.** Keep each Claude account's OAuth login in the hub
+only. If the same account is also logged into the Claude Code CLI (a token file
+at `~/.claude/.credentials.json` or another config dir), the CLI's token refresh
+rotates the refresh token and the hub starts logging
+`token refresh failed ... invalid_grant`. Terminal and T3 Claude do not need
+their own login: `ANTHROPIC_AUTH_TOKEN` plus `ANTHROPIC_BASE_URL` are enough.
+Back up and remove the duplicate file, then run `cli-proxy-api --claude-login`
+once for the hub.
+
 ```bash
 journalctl --user -u cliproxyapi -f
 systemctl --user restart cliproxyapi

@@ -118,6 +118,14 @@ else
   echo "claude not on PATH; skipped $CLAUDE_SETTINGS"
 fi
 
+step "Duplicate logins"
+for creds in "$HOME/.claude/.credentials.json" "$HOME/.claude_second/.credentials.json"; do
+  if [[ -f $creds ]]; then
+    echo "warning: $creds is a second OAuth login for a Claude account."
+    echo "         Its token refresh revokes the hub's token. Back it up and remove it."
+  fi
+done
+
 step "Services"
 systemctl --user daemon-reload
 systemctl --user enable cliproxyapi.service cliproxy-pool-tuner.timer >/dev/null
