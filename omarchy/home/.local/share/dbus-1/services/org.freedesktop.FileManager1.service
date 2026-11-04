@@ -1,0 +1,4 @@
+# Written by `flea --default`; `flea --default off` removes it.
+[D-BUS Service]
+Name=org.freedesktop.FileManager1
+Exec=/usr/lib/flea/flea-filemanager1

@@ -43,14 +43,6 @@ for _, keys in ipairs({
   hl.unbind(keys)
 end
 
--- strata-installer: file-manager start
-hl.unbind("SUPER + SHIFT + F")
-hl.unbind("SUPER + ALT + SHIFT + F")
-o.bind("SUPER + SHIFT + F", "File manager", { launch = "/usr/bin/strata" })
-o.bind("SUPER + ALT + SHIFT + F", "File manager (cwd)",
-  "uwsm-app -- /usr/bin/strata \"$(omarchy-cmd-terminal-cwd)\"")
--- strata-installer: file-manager end
-
 -- Launcher: Keystroke (replaces the Omarchy menu / oma-cast on SUPER + SPACE).
 hl.unbind("SUPER + SPACE")
 o.bind("SUPER + SPACE", "Launcher (Keystroke)", "omarchy-menu toggle root")
@@ -62,3 +54,14 @@ o.bind("SUPER + SPACE", "Launcher (Keystroke)", "omarchy-menu toggle root")
 hl.unbind("switch:on:Lid Switch")
 o.bind("switch:on:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { locked = true })
 -- END Sandman lid action override
+
+-- flea --default: begin. Written by `flea --default`; `flea --default off` removes the block whole.
+hl.unbind("SUPER + SHIFT + F")
+o.bind("SUPER + SHIFT + F", "File manager", { launch = 'flea --gui' })
+hl.unbind("SUPER + ALT + SHIFT + F")
+o.bind("SUPER + ALT + SHIFT + F", "File manager (cwd)", { launch = 'flea --gui "$(omarchy-cmd-terminal-cwd)"' })
+-- flea --default: end.
+
+-- flea --picker: begin. Written by `flea --picker`; `flea --picker off` removes the block whole.
+o.window("com.thisisgm.flea.picker", { tag = "+floating-window" })
+-- flea --picker: end.

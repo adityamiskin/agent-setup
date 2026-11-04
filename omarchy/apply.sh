@@ -6,10 +6,10 @@ repo_dir=$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 PKG_DROP=(
   foot chromium evince mpv mpv-mpris nautilus nautilus-python sushi aether cliamp
-  libreoffice-fresh kdenlive obs-studio pinta xournalpp obsidian
+  libreoffice-fresh kdenlive obs-studio pinta xournalpp obsidian strata
 )
 PKG_ADD=(
-  strata papers matugen asusctl omazed inter-font jdk-openjdk
+  flea papers matugen asusctl omazed inter-font jdk-openjdk
   gst-libav gst-plugins-good gst-plugins-bad gst-plugins-ugly libdvdcss libaacs
 )
 AUR_ADD=(hyprmoncfg-bin typeaside-bin)
@@ -48,7 +48,7 @@ for id in "${!PLUGINS[@]}"; do
 done
 
 step "Config files"
-# Copied rather than linked: Omarchy, hyprmoncfg and the Strata installer rewrite these in place.
+# Copied rather than linked: Omarchy, hyprmoncfg and Flea rewrite these in place.
 stamp=$(date +%s)
 while IFS= read -r -d '' src; do
   rel=${src#"$repo_dir/home/"}
