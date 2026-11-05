@@ -90,6 +90,20 @@ Add a usage source under Settings → Providers, or directly in
 
 Both keys are in `~/cliproxyapi/.keys`.
 
+## Omarchy agents panel
+
+The bar's agents panel reads Claude limits from a CLI home's
+`.credentials.json`, which the hub setup never has. `cliproxy-omarchy-accounts`
+mirrors each hub login into its own home under
+`~/.local/state/omarchy/agents/accounts/claude/<id>/` with the access token
+only (no refresh token, so the hub stays the only thing rotating it), and
+registers them as Omarchy Claude accounts. `cliproxy-omarchy-accounts.path`
+reruns it whenever the hub rewrites an auth file.
+
+The hub picks the account per request, so the panel's ACTIVE label only picks
+which account drives the bar icon. Don't press Use on the other account: that
+would point `omarchy agent` launches at a mirror home instead of `~/.claude`.
+
 ## Troubleshooting
 
 **One account, one login.** Keep each Claude account's OAuth login in the hub

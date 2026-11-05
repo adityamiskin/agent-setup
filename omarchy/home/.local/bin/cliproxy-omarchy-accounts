@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Mirror the CLIProxyAPI Claude logins into the Omarchy agents panel.
+
+The panel reads Claude limits from a CLI home's .credentials.json, but the hub
+owns these logins. Each hub login gets a read-only home under Omarchy's account
+directory holding only its current access token (never the refresh token, so
+nothing but the hub can rotate it), registered as an Omarchy Claude account.
+
+Run by cliproxy-omarchy-accounts.path whenever the hub rewrites an auth file.
+"""
+
+from __future__ import annotations
+
+import fcntl
+import json
+import os
+import shutil
+import subprocess
+import tempfile
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+HUB_AUTH = Path.home() / ".cli-proxy-api"
+STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state") / "omarchy" / "agents" / "accounts"
+HOMES = STATE / "claude"
+REGISTRY = STATE / "claude.json"
+LOCK = STATE / ".claude.lock"
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def write_private(path: Path, data: dict[str, Any]) -> None:
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
+    with os.fdopen(fd, "w") as handle:
+        json.dump(data, handle, indent=2)
+        handle.write("\n")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+
+def profile(token: str) -> dict[str, Any]:
+    request = urllib.request.Request(
+        "https://api.anthropic.com/api/oauth/profile",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "anthropic-version": "2023-06-01",
+            "anthropic-beta": "oauth-2025-04-20",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            return json.load(response)
+    except (OSError, ValueError):
+        return {}
+
+
+def mirror(login: dict[str, Any]) -> dict[str, Any] | None:
+    email = str(login.get("email") or "")
+    token = str(login.get("access_token") or "")
+    if login.get("disabled") or not email or not token:
+        return None
+    stem = email.split("@")[1].split(".")[0]
+    account_id = stem.lower()
+    home = HOMES / account_id
+    home.mkdir(parents=True, exist_ok=True)
+    os.chmod(home, 0o700)
+
+    previous = read_json(home / ".credentials.json").get("claudeAiOauth") or {}
+    org = profile(token).get("organization") or {}
+    org_type = str(org.get("organization_type") or "")
+    subscription = org_type.removeprefix("claude_") if org_type else previous.get("subscriptionType", "")
+    tier = org.get("rate_limit_tier") or previous.get("rateLimitTier", "")
+    expires = datetime.fromisoformat(login["expired"]).timestamp() * 1000 if login.get("expired") else 0
+
+    write_private(home / ".credentials.json", {
+        "claudeAiOauth": {
+            "accessToken": token,
+            "expiresAt": int(expires),
+            "subscriptionType": subscription,
+            "rateLimitTier": tier,
+        }
+    })
+    write_private(home / ".claude.json", {
+        "oauthAccount": {
+            "accountUuid": login.get("account_uuid", ""),
+            "emailAddress": email,
+            "organizationName": login.get("organization_name", ""),
+        }
+    })
+    return {
+        "id": account_id,
+        "label": stem.capitalize(),
+        "home": str(home),
+        "accountId": login.get("account_uuid", ""),
+        "email": email,
+        "org": login.get("organization_name", ""),
+        "plan": subscription.capitalize(),
+    }
+
+
+def main() -> int:
+    logins = [read_json(path) for path in sorted(HUB_AUTH.glob("claude-*.json"))]
+    STATE.mkdir(parents=True, exist_ok=True)
+    with open(LOCK, "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        accounts = [a for a in map(mirror, logins) if a]
+        ids = {a["id"] for a in accounts}
+        for stale in HOMES.iterdir():
+            if stale.is_dir() and stale.name not in ids:
+                shutil.rmtree(stale)
+
+        # The hub picks the account per request, so "active" only chooses which
+        # account drives the bar icon. Keep the primary on a hub home so the
+        # panel never lists an empty ~/.claude, and keep the switch threshold at
+        # 100 so the panel only speaks up when an account is fully spent.
+        registry = read_json(REGISTRY) or {"switch": "manual", "threshold": 100, "alert": ""}
+        primary = next((a["id"] for a in registry.get("accounts", []) if a.get("primary") and a["id"] in ids), None)
+        primary = primary or (accounts[0]["id"] if accounts else None)
+        for account in accounts:
+            account["primary"] = account["id"] == primary
+        registry["accounts"] = accounts
+        if registry.get("active") not in ids:
+            registry["active"] = primary
+        if accounts:
+            write_private(REGISTRY, registry)
+        else:
+            REGISTRY.unlink(missing_ok=True)
+
+    subprocess.run(["omarchy-agent-usage-update", "--limits-only", "claude"], check=False)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

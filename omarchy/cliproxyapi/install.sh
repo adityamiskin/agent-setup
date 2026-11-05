@@ -128,8 +128,8 @@ done
 
 step "Services"
 systemctl --user daemon-reload
-systemctl --user enable cliproxyapi.service cliproxy-pool-tuner.timer >/dev/null
-systemctl --user start cliproxyapi.service cliproxy-pool-tuner.timer
+systemctl --user enable cliproxyapi.service cliproxy-pool-tuner.timer cliproxy-omarchy-accounts.path >/dev/null
+systemctl --user start cliproxyapi.service cliproxy-pool-tuner.timer cliproxy-omarchy-accounts.path
 loginctl enable-linger "$USER" 2>/dev/null || true
 
 step "Claude accounts"

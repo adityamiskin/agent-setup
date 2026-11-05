@@ -1,0 +1,9 @@
+[Unit]
+Description=Re-mirror CLIProxyAPI Claude logins when the hub rewrites them
+
+[Path]
+PathChanged=%h/.cli-proxy-api
+Unit=cliproxy-omarchy-accounts.service
+
+[Install]
+WantedBy=default.target
