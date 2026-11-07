@@ -71,3 +71,11 @@ hl.config({
 
 -- Opaque when focused; keep default transparency when unfocused.
 o.window(".*", { opacity = "1 0.96" })
+
+-- Omarchy floats all Steam windows; tile the main client, keep dialogs floating.
+o.window({ class = "steam", title = "^Steam$" }, { tile = true })
+
+-- Opt another application in to Omarchy's standard transparency.
+-- Find its class with: hyprctl clients
+-- o.transparent_window("my-app")
+-- o.transparent_window("my-app", "0.9 0.85") -- Custom active/inactive opacity.

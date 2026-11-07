@@ -9,7 +9,7 @@ PKG_DROP=(
   libreoffice-fresh kdenlive obs-studio pinta xournalpp obsidian strata
 )
 PKG_ADD=(
-  flea papers matugen asusctl omazed inter-font jdk-openjdk
+  flea papers xorg-xrdb matugen asusctl omazed inter-font jdk-openjdk
   gst-libav gst-plugins-good gst-plugins-bad gst-plugins-ugly libdvdcss libaacs
 )
 AUR_ADD=(hyprmoncfg-bin typeaside-bin)
