@@ -86,23 +86,6 @@ grep -q ANDROID_HOME "$HOME/.bashrc" ||
 step "CLIProxyAPI hub"
 "$repo_dir/cliproxyapi/install.sh"
 
-step "OpenCode theme"
-# Omarchy renders opencode.json.tpl into the active theme on every theme change;
-# the symlink makes it visible to OpenCode as the "omarchy" theme.
-mkdir -p "$HOME/.config/opencode/themes"
-ln -sfn "$HOME/.local/state/omarchy/current/theme/opencode.json" "$HOME/.config/opencode/themes/omarchy.json"
-# Render it once for the current theme so the link resolves before the next switch.
-if [[ -f $HOME/.local/state/omarchy/current/theme/colors.toml ]]; then
-  staging="$HOME/.local/state/omarchy/current/next-theme"
-  rm -rf "$staging"
-  mkdir -p "$staging"
-  cp "$HOME/.local/state/omarchy/current/theme/colors.toml" "$staging/colors.toml"
-  if omarchy-theme-set-templates && [[ -f $staging/opencode.json ]]; then
-    cp "$staging/opencode.json" "$HOME/.local/state/omarchy/current/theme/opencode.json"
-  fi
-  rm -rf "$staging"
-fi
-
 step "Slack theme"
 # Vendored from github.com/GruperTal/omarchy-slack-theme; see slack/README.md.
 if [[ -d /usr/lib/slack/resources ]]; then
