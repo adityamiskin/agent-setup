@@ -1,0 +1,4 @@
+[Environment]
+VK_DRIVER_FILES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json
+GDK_SCALE=1
+GDK_DPI_SCALE=1.666667
